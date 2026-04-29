@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pets-backend-local
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env.development
+    # Use volumes for hot-reloading if you want to develop inside the container
+    # volumes:
+    #   - ./backend:/app
+    #   - /app/node_modules
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pets-frontend-local
+    ports:
+      - "5173:80" # Maps local port 5173 to Nginx port 80
+    depends_on:
+      - backend

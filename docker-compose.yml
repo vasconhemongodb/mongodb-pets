@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  pets-backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pets-backend
+    restart: always
+    env_file: .env.production
+    networks:
+      - web-proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pets-api.rule=Host(`${DOMAIN_NAME}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.pets-api.entrypoints=websecure"
+      - "traefik.http.routers.pets-api.tls.certresolver=myresolver"
+      - "traefik.http.services.pets-api.loadbalancer.server.port=3000"
+      - "traefik.http.middlewares.pets-strip-api.stripprefix.prefixes=/api"
+      - "traefik.http.routers.pets-api.middlewares=pets-strip-api"
+
+  pets-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pets-frontend
+    restart: always
+    networks:
+      - web-proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pets.rule=Host(`${DOMAIN_NAME}`)"
+      - "traefik.http.routers.pets.entrypoints=websecure"
+      - "traefik.http.routers.pets.tls.certresolver=myresolver"
+      - "traefik.http.services.pets.loadbalancer.server.port=80"
+
+networks:
+  web-proxy:
+    external: true

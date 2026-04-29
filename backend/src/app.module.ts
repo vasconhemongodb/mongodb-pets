@@ -11,7 +11,7 @@ import { validate } from './config/env.validation';
     ConfigModule.forRoot({
       validate,
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
+      envFilePath: `../.env.${process.env.NODE_ENV || 'development'}`,
     }),
     DatabaseModule,
     PetsModule,

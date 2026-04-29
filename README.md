@@ -33,22 +33,49 @@ This project is a full-stack application for managing pet information, featuring
    npm run start:dev
    ```
 
-### Frontend Setup
+## Running Locally
 
-1. Navigate to the `frontend` directory:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
+### Option 1: Without Docker (Development Mode)
 
-### Seeding Data
+This is best for active development with hot-reloading.
+
+1.  **Backend:**
+    ```bash
+    cd backend
+    npm install
+    npm run start:dev  # Runs on http://localhost:3000
+    ```
+2.  **Frontend:**
+    ```bash
+    cd frontend
+    npm install
+    npm run dev        # Runs on http://localhost:5173
+    ```
+
+### Option 2: With Docker (Local Production Simulation)
+
+This uses the optimized Docker images but skips the Traefik/SSL setup for simplicity.
+
+```bash
+docker compose -f docker-compose.local.yml up --build
+```
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:3000`
+
+### Option 3: Production Deployment (EC2)
+
+This project is designed to run behind a shared Traefik reverse proxy.
+
+1.  **Shared Infrastructure:** Ensure you have the `infra` folder set up outside this repository with Traefik running on an external network named `web-proxy`.
+2.  **Configure Project:** Create `.env.production` from `.env.production.example`.
+3.  **Launch:**
+    ```bash
+    docker compose up -d --build
+    ```
+
+The apps will automatically register with Traefik using the `DOMAIN_NAME` provided in your `.env.production`.
+
+## Seeding Data
 
 You can use the provided Python scripts to seed the database with pet data:
 
