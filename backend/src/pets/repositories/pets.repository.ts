@@ -7,7 +7,7 @@ export class PetsRepository {
   private collection: Collection<Pet>;
 
   constructor(@Inject('MONGODB_CONNECTION') private db: Db) {
-    this.collection = this.db.collection<Pet>('pets');
+    this.collection = this.db.collection<Pet>('dogs');
   }
 
   async create(pet: Pet): Promise<Pet> {
