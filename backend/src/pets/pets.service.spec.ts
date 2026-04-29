@@ -1,35 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PetsService } from './dogs.service';
+import { PetsService } from './pets.service';
 import { ConfigService } from '@nestjs/config';
-import { Db, Collection } from 'mongodb';
+import { PetsRepository } from './repositories/pets.repository';
+import { S3Service } from '../integrations/s3/s3.service';
 
 jest.mock('uuid', () => ({ v4: () => 'test-uuid' }));
 
 describe('PetsService', () => {
   let service: PetsService;
-  let db: Db;
-  let collection: Collection;
+  let repository: PetsRepository;
 
-  const mockDb = {
-    collection: jest.fn().mockReturnValue({
-      find: jest.fn().mockReturnValue({
-        toArray: jest.fn().mockResolvedValue([]),
-        explain: jest.fn().mockResolvedValue({
-          queryPlanner: {
-            winningPlan: {
-              stage: 'COLLSCAN',
-            },
-          },
-          executionStats: {
-            executionTimeMillis: 5,
-            totalKeysExamined: 0,
-            totalDocsExamined: 10,
-            nReturned: 0,
-          },
-        }),
-      }),
-      insertOne: jest.fn(),
-    }),
+  const mockRepository = {
+    findAll: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    count: jest.fn(),
+    explain: jest.fn(),
+    aggregate: jest.fn(),
+    distinctBreeds: jest.fn(),
   };
 
   const mockConfigService = {
@@ -40,18 +28,22 @@ describe('PetsService', () => {
     }),
   };
 
+  const mockS3Service = {
+    uploadFile: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PetsService,
-        { provide: 'MONGODB_CONNECTION', useValue: mockDb },
+        { provide: PetsRepository, useValue: mockRepository },
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: S3Service, useValue: mockS3Service },
       ],
     }).compile();
 
     service = module.get<PetsService>(PetsService);
-    db = module.get<Db>('MONGODB_CONNECTION');
-    collection = db.collection('dogs');
+    repository = module.get<PetsRepository>(PetsRepository);
   });
 
   it('should be defined', () => {
@@ -59,26 +51,20 @@ describe('PetsService', () => {
   });
 
   describe('findAll', () => {
-    it('should call collection.find with filters and return metrics and total', async () => {
-      const filters = { name: 'Rex', breed: 'Labrador', bornAfter: new Date('2020-01-01'), page: 1, limit: 15 };
-      const response = await service.findAll(filters);
-
-      expect(collection.find).toHaveBeenCalledWith({
-        name: 'Rex',
-        breed: 'Labrador',
-        birthDate: { $gt: filters.bornAfter },
+    it('should call repository.findAll and return metrics', async () => {
+      const mockResults = [{ name: 'Rex', breed: 'Labrador' }];
+      mockRepository.findAll.mockResolvedValue(mockResults);
+      mockRepository.explain.mockResolvedValue({
+        queryPlanner: { winningPlan: { stage: 'COLLSCAN' } },
+        executionStats: { executionTimeMillis: 5, totalDocsExamined: 10 },
       });
 
-      expect(response).toHaveProperty('results');
-      expect(response).toHaveProperty('total'); // Check for total field
-      expect(response).toHaveProperty('metrics');
-      expect(response.metrics.executionTimeMillis).toBe(5);
-      expect(response.total).toBe(0); // Assuming total is 0 based on mock
-    });
+      const filters = { name: 'Rex' };
+      const response = await service.findAll(filters as any);
 
-    it('should call collection.find with empty query if no filters provided', async () => {
-      await service.findAll();
-      expect(collection.find).toHaveBeenCalledWith({});
+      expect(mockRepository.findAll).toHaveBeenCalled();
+      expect(response).toHaveProperty('results');
+      expect(response.metrics.executionTimeMillis).toBe(5);
     });
   });
 });

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PetsController } from './dogs.controller';
-import { PetsService } from './dogs.service';
-import { GetPetsFilterDto } from './dto/get-dogs-filter.dto';
+import { PetsController } from './pets.controller';
+import { PetsService } from './pets.service';
+import { GetPetsFilterDto } from './dto/get-pets-filter.dto';
 
 jest.mock('uuid', () => ({ v4: () => 'test-uuid' }));
 
@@ -15,9 +15,11 @@ describe('PetsController', () => {
     breed: 'Labrador',
     birthDate: new Date('2020-01-01'),
     image: 'http://image.url',
+  };
+
   const mockResponse = {
     results: [mockPet],
-    total: 1, // Added total field
+    total: 1,
     metrics: {
       query: {},
       executionTimeMillis: 10,
@@ -37,16 +39,12 @@ describe('PetsController', () => {
             findAll: jest.fn().mockResolvedValue(mockResponse),
             create: jest.fn().mockResolvedValue(mockPet),
             uploadImage: jest.fn().mockResolvedValue('http://image.url'),
-            // Removed cleanupOrphanImages mock as it's no longer in the service
           },
         },
       ],
     }).compile();
-  ...
-    expect(result).toEqual(mockResponse);
-  });
-  });
 
+    controller = module.get<PetsController>(PetsController);
     service = module.get<PetsService>(PetsService);
   });
 
