@@ -6,36 +6,16 @@ This project is a full-stack application for managing pet information, featuring
 
 - `backend/`: NestJS application providing the REST API.
 - `frontend/`: Vue.js 3 + Vite application for the user interface.
-- `scripts/`: Python scripts for database seeding and maintenance.
 
-## Getting Started
-
-### Prerequisites
+## Prerequisites
 
 - Node.js (v18 or later)
 - MongoDB instance (local or Atlas)
-- Python 3 (for scripts)
-
-### Backend Setup
-
-1. Navigate to the `backend` directory:
-   ```bash
-   cd backend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Configure environment variables:
-   Copy `.env.example` to `.env` and update the values (MongoDB URI, S3 credentials, etc.).
-4. Start the development server:
-   ```bash
-   npm run start:dev
-   ```
+- **Container Engine:** Docker or Podman (optional, for containerized execution)
 
 ## Running Locally
 
-### Option 1: Without Docker (Development Mode)
+### Option 1: Development Mode (Manual)
 
 This is best for active development with hot-reloading.
 
@@ -43,6 +23,7 @@ This is best for active development with hot-reloading.
     ```bash
     cd backend
     npm install
+    # Copy .env.development.example to .env and configure
     npm run start:dev  # Runs on http://localhost:3000
     ```
 2.  **Frontend:**
@@ -52,17 +33,25 @@ This is best for active development with hot-reloading.
     npm run dev        # Runs on http://localhost:5173
     ```
 
-### Option 2: With Docker (Local Production Simulation)
+### Option 2: Containerized (Local Production Simulation)
 
-This uses the optimized Docker images but skips the Traefik/SSL setup for simplicity.
+This uses optimized images and orchestrates both services using Docker or Podman.
 
+**Using Docker:**
 ```bash
 docker compose -f docker-compose.local.yml up --build
 ```
+
+**Using Podman:**
+```bash
+podman compose -f docker-compose.local.yml up --build
+```
+> **Note for Podman users:** Ensure you have `podman-compose` installed or use the built-in `podman compose` (available in Podman 4+).
+
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:3000`
 
-### Option 3: Production Deployment (EC2)
+## Production Deployment (EC2)
 
 This project is designed to run behind a shared Traefik reverse proxy.
 
@@ -70,26 +59,16 @@ This project is designed to run behind a shared Traefik reverse proxy.
 2.  **Configure Project:** Create `.env.production` from `.env.production.example`.
 3.  **Launch:**
     ```bash
+    # Using Docker
     docker compose up -d --build
+
+    # Using Podman
+    podman compose up -d --build
     ```
 
 The apps will automatically register with Traefik using the `DOMAIN_NAME` provided in your `.env.production`.
-
-## Seeding Data
-
-You can use the provided Python scripts to seed the database with pet data:
-
-1. Navigate to the `scripts` directory:
-   ```bash
-   cd scripts
-   ```
-2. Run the seed script:
-   ```bash
-   python seed_pets.py
-   ```
 
 ## Technologies Used
 
 - **Backend:** NestJS, MongoDB (Native Driver), AWS SDK (S3), TypeScript.
 - **Frontend:** Vue.js 3, Vite, TypeScript.
-- **Scripts:** Python.
