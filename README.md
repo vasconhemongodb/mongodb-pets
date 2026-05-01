@@ -23,13 +23,14 @@ This is best for active development with hot-reloading.
     ```bash
     cd backend
     npm install
-    # Copy .env.development.example to .env and configure
+    # Copy .env.example to .env and configure
     npm run start:dev  # Runs on http://localhost:3000
     ```
 2.  **Frontend:**
     ```bash
     cd frontend
     npm install
+    # Copy .env.example (from root) to .env and configure
     npm run dev        # Runs on http://localhost:5173
     ```
 
@@ -56,7 +57,7 @@ podman compose -f docker-compose.local.yml up --build
 This project is designed to run behind a shared Traefik reverse proxy.
 
 1.  **Shared Infrastructure:** Ensure you have the `infra` folder set up outside this repository with Traefik running on an external network named `web-proxy`.
-2.  **Configure Project:** Create `.env.production` from `.env.production.example`.
+2.  **Configure Project:** Create `.env.production` from `.env.example`.
 3.  **Launch:**
     ```bash
     # Using Docker
